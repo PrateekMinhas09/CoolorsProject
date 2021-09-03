@@ -33,7 +33,7 @@ svg {
   overflow: hidden;
 }
 .color h2 {
-  font-size: 2rem;
+  font-size: 1.25rem;
   cursor: pointer;
 }
 .sliders {
@@ -105,7 +105,7 @@ svg {
 
 .adjust,
 .lock {
-  font-size: 1rem;
+  font-size: 1.25rem;
   border: none;
   background: none;
   cursor: pointer;

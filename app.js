@@ -38,7 +38,19 @@ colorDivs.forEach((div,index)=>{
     div.style.backgroundColor = randomColor;
     hexText.innerText = randomColor;
 
-
+    checkTextContrast(randomColor,hexText);
 });
+}
+
+
+function checkTextContrast(color,text){
+const luminance = chroma(color).luminance(); // checks contrast 
+if(luminance>0.5)
+{
+    text.style.color="black";
+}
+else{
+    text.style.color="white";
+}
 }
 randomColors();
