@@ -7,9 +7,12 @@ const currentHexes = document.querySelectorAll(`.color h2`);
 const popup = document.querySelector(".copy-container");
 const adjustBtn = document.querySelectorAll(".adjust");
 const closeAdjustment = document.querySelectorAll(".close-adjustment");
+
 const sliderContainers = document.querySelectorAll(".sliders");
 const lockBtn = document.querySelectorAll(".lock");
 let initialColors;
+
+let savedPalette=[];
 
 //eventlistenrs
 generateBtn.addEventListener("click",()=>{
@@ -30,6 +33,8 @@ copyToClipboard(hex);
 });
 });
 
+
+
 popup.addEventListener("transitionend",()=>{
         
         popup.children[0].classList.remove('active');
@@ -43,6 +48,25 @@ button.addEventListener("click",()=>{
     openAdjustmentPanel(index);
 })
 });
+
+lockBtn.forEach((button,index)=>{
+   
+    button.addEventListener("click",(e)=>{
+        colorDivs[index].classList.toggle("locked");
+        if( colorDivs[index].classList.contains("locked"))
+        {
+          e.target.innerHTML= `<i class='fas fa-lock'></i>`;
+        }
+        else 
+        {
+            e.target.innerHTML= `<i class='fas fa-lock-open'></i>`;
+        }
+       
+    });
+});
+
+
+
 
 
 //functions 
@@ -72,7 +96,20 @@ colorDivs.forEach((div,index)=>{
 
     const hexText = div.children[0];
     const randomColor = generateHex();
-    initialColors.push(chroma(randomColor).hex());
+
+    if(div.classList.contains('locked')){
+        initialColors.push(hexText.innerText);
+        return;
+    }
+    else{
+        initialColors.push(chroma(randomColor).hex());
+    }
+
+
+
+
+
+   
 
 
     div.style.backgroundColor = randomColor;
@@ -222,12 +259,112 @@ function copyToClipboard(hex){
 
 function openAdjustmentPanel(index){
     sliderContainers[index].classList.toggle("active");
-    console.log();
+    
 
-    sliderContainers[index].children[0].addEventListener("click",()=>{
+    closeAdjustment[index].addEventListener("click",()=>{
         sliderContainers[index].classList.remove("active");
     });
 }
+
+
+//implement save to palette and local storage stuff 
+const saveBtn = document.querySelector(".save");
+const submitSave = document.querySelector(".submit-save");
+const closeSave = document.querySelector(".close-save");
+const saveContainer = document.querySelector(".save-container");
+const saveInput= document.querySelector(".save-container input");
+const libraryContainer = document.querySelector('.library-container');
+const librarybtn = document.querySelector('.library');
+const closelibbtn = document.querySelector('.close-library');
+
+closeSave.addEventListener("click",()=>{
+   saveContainer.classList.toggle('active');
+});
+saveBtn.addEventListener("click",openPalette);
+
+function openPalette(e)
+{   const popup = saveContainer.children[0];
+    saveContainer.classList.add("active");
+    popup.classList.add("active");
+
+}
+
+
+submitSave.addEventListener("click",savepalette);
+
+function savepalette(e){
+    const popup = saveContainer.children[0];
+    saveContainer.classList.remove('active');
+    popup.classList.remove('active');
+    const name = saveInput.value;
+    const colors=[];
+    currentHexes.forEach(hex => {
+        colors.push(hex.innerText);
+
+        
+    });
+//generate object
+let palettenr = savedPalette.length;
+const paletteObj = {name, colors, nr:palettenr};
+savedPalette.push(paletteObj);
+
+//save to local storage
+savetoLocal(paletteObj);
+saveInput.value = "";
+//generate palette for ui
+const palette = document.createElement('div');
+palette.classList.add('custom-palette');
+const title = document.createElement('h4');
+title.innerText= paletteObj.name;
+const preview = document.createElement('div');
+preview.classList.add('small-preview');
+paletteObj.colors.forEach(smallcolor=>{
+    const smalldiv=document.createElement('div');
+    smalldiv.style.backgroundColor=smallcolor;
+    preview.appendChild(smalldiv);
+});
+
+const palettebtn = document.createElement('button');
+palettebtn.classList.add('pick-palette-btn');
+palettebtn.classList.add(paletteObj.nr);
+palettebtn.innerText='Select';
+
+//append to library
+palette.appendChild(title);
+palette.appendChild(preview);
+palette.appendChild(palettebtn);
+libraryContainer.children[0].appendChild(palette);
+
+}
+function savetoLocal(paletteObj)
+{
+    let localPalette;
+     if( localStorage.getItem('palettes')===null){
+         localPalette=[];
+     }
+     else{
+         localPalette.JSON.parse(localStorage.getItem('palettes'));
+     }
+
+     localPalette.push(paletteObj);
+     localStorage.setItem("palettes",JSON.stringify(localPalette));
+}
+
+
+function openlib(){
+    const popup = libraryContainer.children[0];
+    libraryContainer.classList.add('active');
+    popup.classList.add('active');
+}
+
+function closelib(){
+    const popup = libraryContainer.children[0];
+    libraryContainer.classList.remove('active');
+    popup.classList.remove('active');
+}
+console.log(librarybtn);
+librarybtn.addEventListener('click',openlib);
+closelibbtn.addEventListener('click',closelib);
 randomColors();
 
 
